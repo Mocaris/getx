@@ -111,7 +111,7 @@ class GetObserver extends NavigatorObserver {
       value.route = previousRoute;
       value.isBack = false;
       value.removed = removeRoute.name ?? '';
-      value.previous = newRoute.name ?? '';
+      value.previous = removeRoute.name ?? '';
       // value.isSnackbar = currentRoute.isSnackbar ? false : value.isSnackbar;
       value.isBottomSheet = newRoute.isBottomSheet;
       value.isDialog = newRoute.isDialog;
