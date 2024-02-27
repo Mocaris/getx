@@ -40,17 +40,12 @@ class GetObserver extends NavigatorObserver {
     super.didPop(route, previousRoute);
     final currentRoute = _RouteData.ofRoute(route);
     final newRoute = _RouteData.ofRoute(previousRoute);
-
-    // if (currentRoute.isSnackbar) {
-    //   // Get.log("CLOSE SNACKBAR ${currentRoute.name}");
-    //   Get.log("CLOSE SNACKBAR");
-    // } else
-
     if (currentRoute.isBottomSheet || currentRoute.isDialog) {
       Get.log("CLOSE ${currentRoute.name}");
-    } else if (currentRoute.isGetPageRoute) {
-      Get.log("CLOSE TO ROUTE ${currentRoute.name}");
+    }else if (newRoute.isGetPageRoute) {
+      Get.log("CLOSE TO ROUTE ${newRoute.name}");
     }
+
     if (previousRoute != null) {
       RouterReportManager.instance.reportCurrentRoute(previousRoute);
     }
@@ -59,14 +54,8 @@ class GetObserver extends NavigatorObserver {
     // previous route instead of 'route' because this is
     // a 'inverse push'
     _routeSend?.update((value) {
-      // Only PageRoute is allowed to change current value
-      if (previousRoute is PageRoute) {
-        value.current = _extractRouteName(previousRoute) ?? '';
-        value.previous = newRoute.name ?? '';
-      } else if (value.previous.isNotEmpty) {
-        value.current = value.previous;
-      }
-
+      value.current = newRoute.name ?? '';
+      value.previous = currentRoute.name ?? '';
       value.args = previousRoute?.settings.arguments;
       value.route = previousRoute;
       value.isBack = true;
@@ -77,7 +66,6 @@ class GetObserver extends NavigatorObserver {
     });
 
     // print('currentRoute.isDialog ${currentRoute.isDialog}');
-
     routing?.call(_routeSend);
   }
 
@@ -85,12 +73,7 @@ class GetObserver extends NavigatorObserver {
   void didPush(Route route, Route? previousRoute) {
     super.didPush(route, previousRoute);
     final newRoute = _RouteData.ofRoute(route);
-
-    // if (newRoute.isSnackbar) {
-    //   // Get.log("OPEN SNACKBAR ${newRoute.name}");
-    //   Get.log("OPEN SNACKBAR");
-    // } else
-
+    final previous = _RouteData.ofRoute(previousRoute);
     if (newRoute.isBottomSheet || newRoute.isDialog) {
       Get.log("OPEN ${newRoute.name}");
     } else if (newRoute.isGetPageRoute) {
@@ -99,83 +82,69 @@ class GetObserver extends NavigatorObserver {
 
     RouterReportManager.instance.reportCurrentRoute(route);
     _routeSend!.update((value) {
-      // Only PageRoute is allowed to change current value
-      if (route is PageRoute) {
-        value.current = newRoute.name ?? '';
-      }
-      final previousRouteName = _extractRouteName(previousRoute);
-      if (previousRouteName != null) {
-        value.previous = previousRouteName;
-      }
+      value.current = newRoute.name ?? '';
+      value.previous = previous.name ?? '';
 
       value.args = route.settings.arguments;
       value.route = route;
       value.isBack = false;
       value.removed = '';
-      value.isBottomSheet =
-          newRoute.isBottomSheet ? true : value.isBottomSheet ?? false;
-      value.isDialog = newRoute.isDialog ? true : value.isDialog ?? false;
+      value.isBottomSheet = newRoute.isBottomSheet;
+      value.isDialog = newRoute.isDialog;
     });
 
-    if (routing != null) {
-      routing!(_routeSend);
-    }
+    routing?.call(_routeSend);
   }
 
   @override
   void didRemove(Route route, Route? previousRoute) {
     super.didRemove(route, previousRoute);
-    final routeName = _extractRouteName(route);
-    final currentRoute = _RouteData.ofRoute(route);
+    final newRoute = _RouteData.ofRoute(previousRoute);
+    final removeRoute = _RouteData.ofRoute(route);
+    Get.log("REMOVING ROUTE ${removeRoute.name}, TO ROUTE ${newRoute.name}");
 
-    Get.log("REMOVING ROUTE $routeName");
-
+    if(null != previousRoute){
+      RouterReportManager.instance.reportCurrentRoute(previousRoute);
+    }
     _routeSend?.update((value) {
+      value.current = newRoute.name ?? '';
       value.route = previousRoute;
       value.isBack = false;
-      value.removed = routeName ?? '';
-      value.previous = routeName ?? '';
+      value.removed = removeRoute.name ?? '';
+      value.previous = newRoute.name ?? '';
       // value.isSnackbar = currentRoute.isSnackbar ? false : value.isSnackbar;
-      value.isBottomSheet =
-          currentRoute.isBottomSheet ? false : value.isBottomSheet;
-      value.isDialog = currentRoute.isDialog ? false : value.isDialog;
+      value.isBottomSheet = newRoute.isBottomSheet;
+      value.isDialog = newRoute.isDialog;
     });
 
     if (route is GetPageRoute) {
       RouterReportManager.instance.reportRouteWillDispose(route);
     }
+
     routing?.call(_routeSend);
   }
 
   @override
   void didReplace({Route? newRoute, Route? oldRoute}) {
     super.didReplace(newRoute: newRoute, oldRoute: oldRoute);
-    final newName = _extractRouteName(newRoute);
-    final oldName = _extractRouteName(oldRoute);
-    final currentRoute = _RouteData.ofRoute(oldRoute);
-
-    Get.log("REPLACE ROUTE $oldName");
-    Get.log("NEW ROUTE $newName");
+    final previousRoute = _RouteData.ofRoute(oldRoute);
+    final currentRoute = _RouteData.ofRoute(newRoute);
+    Get.log("REPLACE ROUTE ${previousRoute.name}, NEW ROUTE ${currentRoute.name}");
 
     if (newRoute != null) {
       RouterReportManager.instance.reportCurrentRoute(newRoute);
     }
 
     _routeSend?.update((value) {
-      // Only PageRoute is allowed to change current value
-      if (newRoute is PageRoute) {
-        value.current = newName ?? '';
-      }
-
+      value.current = currentRoute.name ?? '';
+      value.previous = previousRoute.name ?? '';
       value.args = newRoute?.settings.arguments;
       value.route = newRoute;
       value.isBack = false;
       value.removed = '';
-      value.previous = '$oldName';
       // value.isSnackbar = currentRoute.isSnackbar ? false : value.isSnackbar;
-      value.isBottomSheet =
-          currentRoute.isBottomSheet ? false : value.isBottomSheet;
-      value.isDialog = currentRoute.isDialog ? false : value.isDialog;
+      value.isBottomSheet = currentRoute.isBottomSheet;
+      value.isDialog = currentRoute.isDialog;
     });
     if (oldRoute is GetPageRoute) {
       RouterReportManager.instance.reportRouteWillDispose(oldRoute);
@@ -193,6 +162,7 @@ class Routing {
   String removed;
   Route<dynamic>? route;
   bool? isBack;
+
   // bool? isSnackbar;
   bool? isBottomSheet;
   bool? isDialog;

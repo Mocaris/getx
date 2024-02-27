@@ -28,6 +28,10 @@ extension ExtensionBottomSheet on GetInterface {
     RouteSettings? settings,
     Duration? enterBottomSheetDuration,
     Duration? exitBottomSheetDuration,
+    bool resizeToAvoidBottomInset = true,
+    bool? showDragHandle,
+    Color? dragHandleColor,
+    Size? dragHandleSize,
     Curve? curve,
   }) {
     return Navigator.of(overlayContext!, rootNavigator: useRootNavigator)
@@ -55,6 +59,10 @@ extension ExtensionBottomSheet on GetInterface {
       exitBottomSheetDuration:
           exitBottomSheetDuration ?? const Duration(milliseconds: 200),
       curve: curve,
+      resizeToAvoidBottomInset: resizeToAvoidBottomInset,
+      showDragHandle: showDragHandle,
+      dragHandleColor: dragHandleColor,
+      dragHandleSize: dragHandleSize,
     ));
   }
 }
@@ -867,11 +875,11 @@ extension GetNavigationExt on GetInterface {
     }
   }
 
-  void closeAllDialogsAndBottomSheets(
-    String? id,
-  ) {
+  void closeAllDialogsAndBottomSheets({
+    String? id
+  }) {
     // It can not be divided, because dialogs and bottomsheets can not be consecutive
-    while ((isDialogOpen! && isBottomSheetOpen!)) {
+    while (isDialogOpen! || isBottomSheetOpen!) {
       closeOverlay(id: id);
     }
   }
@@ -879,7 +887,15 @@ extension GetNavigationExt on GetInterface {
   void closeAllDialogs({
     String? id,
   }) {
-    while ((isDialogOpen!)) {
+    while (isDialogOpen!) {
+      closeOverlay(id: id);
+    }
+  }
+
+  void closeCurrentDialogOrBottomSheet({
+    String? id,
+  }) {
+    if (isDialogOpen! || isBottomSheetOpen!) {
       closeOverlay(id: id);
     }
   }
@@ -891,13 +907,13 @@ extension GetNavigationExt on GetInterface {
   void closeAllBottomSheets({
     String? id,
   }) {
-    while ((isBottomSheetOpen!)) {
+    while (isBottomSheetOpen!) {
       searchDelegate(id).navigatorKey.currentState?.pop();
     }
   }
 
   void closeAllOverlays() {
-    closeAllDialogsAndBottomSheets(null);
+    closeAllDialogsAndBottomSheets();
     closeAllSnackbars();
   }
 
@@ -1087,6 +1103,7 @@ extension GetNavigationExt on GetInterface {
     }
     return Uri.tryParse(name)?.toString() ?? name;
   }
+
   //TODO: Deprecated
   // /// change default config of Get
   // void config(
@@ -1306,6 +1323,7 @@ extension GetNavigationExt on GetInterface {
   ConfigData get _getxController => GetRootState.controller.config;
 
   bool get defaultPopGesture => _getxController.defaultPopGesture;
+
   bool get defaultOpaqueRoute => _getxController.defaultOpaqueRoute;
 
   Transition? get defaultTransition => _getxController.defaultTransition;

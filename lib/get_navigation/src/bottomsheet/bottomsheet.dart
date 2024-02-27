@@ -21,10 +21,15 @@ class GetModalBottomSheetRoute<T> extends PopupRoute<T> {
     RouteSettings? settings,
     this.enterBottomSheetDuration = const Duration(milliseconds: 250),
     this.exitBottomSheetDuration = const Duration(milliseconds: 200),
+    this.resizeToAvoidBottomInset=true,
     this.curve,
+    this.showDragHandle,
+    this.dragHandleColor,
+    this.dragHandleSize,
   }) : super(settings: settings) {
     RouterReportManager.instance.reportCurrentRoute(this);
   }
+
   final bool? isPersistent;
   final WidgetBuilder? builder;
   final ThemeData? theme;
@@ -36,12 +41,18 @@ class GetModalBottomSheetRoute<T> extends PopupRoute<T> {
   final Color? modalBarrierColor;
   final bool isDismissible;
   final bool enableDrag;
+
   // final String name;
   final Duration enterBottomSheetDuration;
   final Duration exitBottomSheetDuration;
   final Curve? curve;
+
   // remove safearea from top
   final bool removeTop;
+  final bool resizeToAvoidBottomInset;
+  final bool? showDragHandle;
+  final Color? dragHandleColor;
+  final Size? dragHandleSize;
 
   @override
   Duration get transitionDuration => const Duration(milliseconds: 700);
@@ -88,25 +99,28 @@ class GetModalBottomSheetRoute<T> extends PopupRoute<T> {
         theme?.bottomSheetTheme ?? Theme.of(context).bottomSheetTheme;
     // By definition, the bottom sheet is aligned to the bottom of the page
     // and isn't exposed to the top padding of the MediaQuery.
-    Widget bottomSheet = MediaQuery.removePadding(
-      context: context,
-      removeTop: removeTop,
-      child: Padding(
+    Widget bottomSheet = _GetModalBottomSheet<T>(
+      route: this,
+      backgroundColor: backgroundColor ??
+          sheetTheme.modalBackgroundColor ??
+          sheetTheme.backgroundColor,
+      elevation: elevation ?? sheetTheme.modalElevation ?? sheetTheme.elevation,
+      shape: shape,
+      clipBehavior: clipBehavior,
+      isScrollControlled: isScrollControlled,
+      enableDrag: enableDrag,
+    );
+    if (resizeToAvoidBottomInset) {
+      bottomSheet = Padding(
         padding:
             EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-        child: _GetModalBottomSheet<T>(
-          route: this,
-          backgroundColor: backgroundColor ??
-              sheetTheme.modalBackgroundColor ??
-              sheetTheme.backgroundColor,
-          elevation:
-              elevation ?? sheetTheme.modalElevation ?? sheetTheme.elevation,
-          shape: shape,
-          clipBehavior: clipBehavior,
-          isScrollControlled: isScrollControlled,
-          enableDrag: enableDrag,
-        ),
-      ),
+        child: bottomSheet,
+      );
+    }
+    bottomSheet = MediaQuery.removePadding(
+      context: context,
+      removeTop: removeTop,
+      child: bottomSheet,
     );
     if (theme != null) bottomSheet = Theme(data: theme!, child: bottomSheet);
     return bottomSheet;
@@ -124,6 +138,9 @@ class _GetModalBottomSheet<T> extends StatefulWidget {
     this.isScrollControlled = false,
     this.enableDrag = true,
     this.isPersistent = false,
+    this.showDragHandle,
+    this.dragHandleColor,
+    this.dragHandleSize,
   }) : super(key: key);
   final bool isPersistent;
   final GetModalBottomSheetRoute<T>? route;
@@ -133,6 +150,9 @@ class _GetModalBottomSheet<T> extends StatefulWidget {
   final ShapeBorder? shape;
   final Clip? clipBehavior;
   final bool enableDrag;
+  final bool? showDragHandle;
+  final Color? dragHandleColor;
+  final Size? dragHandleSize;
 
   @override
   _GetModalBottomSheetState<T> createState() => _GetModalBottomSheetState<T>();
@@ -187,6 +207,9 @@ class _GetModalBottomSheetState<T> extends State<_GetModalBottomSheet<T>> {
                         shape: widget.shape,
                         clipBehavior: widget.clipBehavior,
                         enableDrag: widget.enableDrag,
+                        showDragHandle: widget.showDragHandle,
+                        dragHandleColor: widget.dragHandleColor,
+                        dragHandleSize: widget.dragHandleSize,
                       )
                     : Scaffold(
                         bottomSheet: BottomSheet(
@@ -203,6 +226,9 @@ class _GetModalBottomSheetState<T> extends State<_GetModalBottomSheet<T>> {
                           shape: widget.shape,
                           clipBehavior: widget.clipBehavior,
                           enableDrag: widget.enableDrag,
+                          showDragHandle: widget.showDragHandle,
+                          dragHandleColor: widget.dragHandleColor,
+                          dragHandleSize: widget.dragHandleSize,
                         ),
                       )),
           ),
@@ -223,6 +249,9 @@ class _GetPerModalBottomSheet<T> extends StatefulWidget {
     this.clipBehavior,
     this.isScrollControlled = false,
     this.enableDrag = true,
+    this.showDragHandle,
+    this.dragHandleColor,
+    this.dragHandleSize,
   }) : super(key: key);
   final bool? isPersistent;
   final GetModalBottomSheetRoute<T>? route;
@@ -232,6 +261,9 @@ class _GetPerModalBottomSheet<T> extends StatefulWidget {
   final ShapeBorder? shape;
   final Clip? clipBehavior;
   final bool enableDrag;
+  final bool? showDragHandle;
+  final Color? dragHandleColor;
+  final Size? dragHandleSize;
 
   @override
   // ignore: lines_longer_than_80_chars
@@ -290,6 +322,9 @@ class _GetPerModalBottomSheetState<T>
                         shape: widget.shape,
                         clipBehavior: widget.clipBehavior,
                         enableDrag: widget.enableDrag,
+                        showDragHandle: widget.showDragHandle,
+                        dragHandleColor: widget.dragHandleColor,
+                        dragHandleSize: widget.dragHandleSize,
                       )
                     : Scaffold(
                         bottomSheet: BottomSheet(
@@ -306,6 +341,9 @@ class _GetPerModalBottomSheetState<T>
                           shape: widget.shape,
                           clipBehavior: widget.clipBehavior,
                           enableDrag: widget.enableDrag,
+                          showDragHandle: widget.showDragHandle,
+                          dragHandleColor: widget.dragHandleColor,
+                          dragHandleSize: widget.dragHandleSize,
                         ),
                       )),
           ),
