@@ -193,7 +193,7 @@ class GetCupertinoApp extends StatelessWidget {
           onDispose?.call();
         },
         initState: (i) {
-          Get.engine!.addPostFrameCallback((timeStamp) {
+          Get.engine.addPostFrameCallback((timeStamp) {
             onReady?.call();
           });
           if (locale != null) Get.locale = locale;
@@ -226,13 +226,13 @@ class GetCupertinoApp extends StatelessWidget {
                 transitionDuration ?? Get.defaultTransitionDuration,
           );
         },
-        builder: (_) => routerDelegate != null
+        builder: (ctrl) => routerDelegate != null
             ? CupertinoApp.router(
                 routerDelegate: routerDelegate!,
                 routeInformationParser: routeInformationParser!,
                 backButtonDispatcher: backButtonDispatcher,
                 routeInformationProvider: routeInformationProvider,
-                key: _.unikey,
+                key: ctrl.unikey,
                 theme: theme,
                 builder: defaultBuilder,
                 title: title,
@@ -249,10 +249,10 @@ class GetCupertinoApp extends StatelessWidget {
                 showSemanticsDebugger: showSemanticsDebugger,
                 debugShowCheckedModeBanner: debugShowCheckedModeBanner,
                 shortcuts: shortcuts,
-                useInheritedMediaQuery: useInheritedMediaQuery,
+                // useInheritedMediaQuery: useInheritedMediaQuery,
               )
             : CupertinoApp(
-                key: _.unikey,
+                key: ctrl.unikey,
                 theme: theme,
                 navigatorKey: (navigatorKey == null
                     ? Get.key
@@ -289,7 +289,7 @@ class GetCupertinoApp extends StatelessWidget {
                 showSemanticsDebugger: showSemanticsDebugger,
                 debugShowCheckedModeBanner: debugShowCheckedModeBanner,
                 shortcuts: shortcuts,
-                useInheritedMediaQuery: useInheritedMediaQuery,
+                // useInheritedMediaQuery: useInheritedMediaQuery,
                 //   actions: actions,
               ),
       );
@@ -301,8 +301,8 @@ class GetCupertinoApp extends StatelessWidget {
               ? TextDirection.rtl
               : TextDirection.ltr),
       child: builder == null
-          ? (child ?? Material())
-          : builder!(context, child ?? Material()),
+          ? (child ?? const Material())
+          : builder!(context, child ?? const Material()),
     );
   }
 

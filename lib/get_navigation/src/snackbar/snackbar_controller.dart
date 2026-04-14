@@ -88,7 +88,7 @@ class SnackbarController {
   }
 
   void _configureOverlay() {
-    _overlayState = Overlay.of(Get.overlayContext!);
+    _overlayState = Get.key.currentState?.overlay;
     _overlayEntries.clear();
     _overlayEntries.addAll(_createOverlayEntries(_getBodyWidget()));
     _overlayState!.insertAll(_overlayEntries);
@@ -212,15 +212,15 @@ class SnackbarController {
       ],
       OverlayEntry(
         builder: (context) => Semantics(
+          focused: false,
+          container: true,
+          explicitChildNodes: true,
           child: AlignTransition(
             alignment: _animation,
             child: snackbar.isDismissible
                 ? _getDismissibleSnack(child)
                 : _getSnackbarContainer(child),
           ),
-          focused: false,
-          container: true,
-          explicitChildNodes: true,
         ),
         maintainState: false,
         opaque: false,
@@ -231,10 +231,10 @@ class SnackbarController {
   Widget _getBodyWidget() {
     return Builder(builder: (_) {
       return GestureDetector(
-        child: snackbar,
         onTap: snackbar.onTap != null
             ? () => snackbar.onTap?.call(snackbar)
             : null,
+        child: snackbar,
       );
     });
   }

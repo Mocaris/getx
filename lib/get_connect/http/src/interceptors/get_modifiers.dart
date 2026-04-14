@@ -10,7 +10,7 @@ typedef ResponseModifier<T> = FutureOr Function(
 
 typedef HandlerExecute<T> = Future<Request<T>> Function();
 
-class GetModifier<T> {
+class GetModifier<S> {
   final _requestModifiers = <RequestModifier>[];
   final _responseModifiers = <ResponseModifier>[];
   RequestModifier? authenticator;
@@ -47,7 +47,7 @@ class GetModifier<T> {
     var newResponse = response;
     if (_responseModifiers.isNotEmpty) {
       for (var interceptor in _responseModifiers) {
-        newResponse = await interceptor(request, response) as Response<T>;
+        newResponse = await interceptor(request, newResponse) as Response<T>;
       }
     }
 

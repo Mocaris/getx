@@ -208,7 +208,7 @@ class GetMaterialApp extends StatelessWidget {
           onDispose?.call();
         },
         initState: (i) {
-          Get.engine!.addPostFrameCallback((timeStamp) {
+          Get.engine.addPostFrameCallback((timeStamp) {
             onReady?.call();
           });
           if (locale != null) Get.locale = locale;
@@ -242,24 +242,26 @@ class GetMaterialApp extends StatelessWidget {
                 transitionDuration ?? Get.defaultTransitionDuration,
           );
         },
-        builder: (_) => routerDelegate != null
+        builder: (ctrl) => routerDelegate != null
             ? MaterialApp.router(
                 routerDelegate: routerDelegate!,
                 routeInformationParser: routeInformationParser!,
                 backButtonDispatcher: backButtonDispatcher,
                 routeInformationProvider: routeInformationProvider,
-                key: _.unikey,
+                key: ctrl.unikey,
                 builder: defaultBuilder,
                 title: title,
                 onGenerateTitle: onGenerateTitle,
                 color: color,
-                theme: _.theme ?? theme ?? ThemeData.fallback(),
-                darkTheme:
-                    _.darkTheme ?? darkTheme ?? theme ?? ThemeData.fallback(),
-                themeMode: _.themeMode ?? themeMode,
+                theme: ctrl.theme ?? theme ?? ThemeData.fallback(),
+                darkTheme: ctrl.darkTheme ??
+                    darkTheme ??
+                    theme ??
+                    ThemeData.fallback(),
+                themeMode: ctrl.themeMode ?? themeMode,
                 locale: Get.locale ?? locale,
                 scaffoldMessengerKey:
-                    scaffoldMessengerKey ?? _.scaffoldMessengerKey,
+                    scaffoldMessengerKey ?? ctrl.scaffoldMessengerKey,
                 localizationsDelegates: localizationsDelegates,
                 localeListResolutionCallback: localeListResolutionCallback,
                 localeResolutionCallback: localeResolutionCallback,
@@ -272,15 +274,15 @@ class GetMaterialApp extends StatelessWidget {
                 debugShowCheckedModeBanner: debugShowCheckedModeBanner,
                 shortcuts: shortcuts,
                 scrollBehavior: scrollBehavior,
-                useInheritedMediaQuery: useInheritedMediaQuery,
+                // useInheritedMediaQuery: useInheritedMediaQuery,
               )
             : MaterialApp(
-                key: _.unikey,
+                key: ctrl.unikey,
                 navigatorKey: (navigatorKey == null
                     ? Get.key
                     : Get.addKey(navigatorKey!)),
                 scaffoldMessengerKey:
-                    scaffoldMessengerKey ?? _.scaffoldMessengerKey,
+                    scaffoldMessengerKey ?? ctrl.scaffoldMessengerKey,
                 home: home,
                 routes: routes ?? const <String, WidgetBuilder>{},
                 initialRoute: initialRoute,
@@ -302,10 +304,12 @@ class GetMaterialApp extends StatelessWidget {
                 title: title,
                 onGenerateTitle: onGenerateTitle,
                 color: color,
-                theme: _.theme ?? theme ?? ThemeData.fallback(),
-                darkTheme:
-                    _.darkTheme ?? darkTheme ?? theme ?? ThemeData.fallback(),
-                themeMode: _.themeMode ?? themeMode,
+                theme: ctrl.theme ?? theme ?? ThemeData.fallback(),
+                darkTheme: ctrl.darkTheme ??
+                    darkTheme ??
+                    theme ??
+                    ThemeData.fallback(),
+                themeMode: ctrl.themeMode ?? themeMode,
                 locale: Get.locale ?? locale,
                 localizationsDelegates: localizationsDelegates,
                 localeListResolutionCallback: localeListResolutionCallback,
@@ -319,7 +323,7 @@ class GetMaterialApp extends StatelessWidget {
                 debugShowCheckedModeBanner: debugShowCheckedModeBanner,
                 shortcuts: shortcuts,
                 scrollBehavior: scrollBehavior,
-                useInheritedMediaQuery: useInheritedMediaQuery,
+                // useInheritedMediaQuery: useInheritedMediaQuery,
                 //   actions: actions,
               ),
       );
@@ -331,8 +335,8 @@ class GetMaterialApp extends StatelessWidget {
               ? TextDirection.rtl
               : TextDirection.ltr),
       child: builder == null
-          ? (child ?? Material())
-          : builder!(context, child ?? Material()),
+          ? (child ?? const Material())
+          : builder!(context, child ?? const Material()),
     );
   }
 
